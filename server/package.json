@@ -1,0 +1,15 @@
+{
+  "name": "sentiment-server",
+  "version": "1.0.0",
+  "description": "SentimentAPIServer",
+  "main": "app.js",
+  "scripts": {
+    "test": "test-sentiment"
+  },
+  "author": "dipal",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.1"
+  }
+}
