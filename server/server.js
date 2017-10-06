@@ -126,16 +126,17 @@ function calculateSentiment(content) {
 	return 'neutral';
 }
 
+
 var server = https.createServer(sslOptions, app).listen(8921, function() {
   var host = server.address().address
   var port = server.address().port
 
-  console.log("Example app listening at http://%s:%s", host, port)
+  console.log("Example app listening at https://%s:%s", host, port)
 
 });
 
-
-/*var server = app.listen(8921, function () {
+/*
+var server = app.listen(8921, function () {
 
   var host = server.address().address
   var port = server.address().port
