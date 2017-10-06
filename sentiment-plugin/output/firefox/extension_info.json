@@ -1,0 +1,22 @@
+{
+    "content_scripts": [
+        "gmail.js"
+    ], 
+    "description": "Extension description", 
+    "creator": "Kango", 
+    "framework_version": "1.8.0 3dc957b83b36", 
+    "package_id": "kango-107b5f36-338c-4b5a-b6ac-3ea6094959c1", 
+    "background_scripts": [
+        "main.js"
+    ], 
+    "homepage_url": "http://kangoextensions.com/", 
+    "version": "0.9.0", 
+    "framework_package_id": "dev", 
+    "browser_button": {
+        "caption": "Kango", 
+        "tooltipText": "Kango", 
+        "icon": "icons/button.png"
+    }, 
+    "id": "{107B5F36-338C-4B5A-B6AC-3EA6094959C1}", 
+    "name": "Sentiment"
+}
