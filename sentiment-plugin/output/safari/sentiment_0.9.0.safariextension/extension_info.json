@@ -1,6 +1,6 @@
 {
     "content_scripts": [
-        "gmail.js"
+        "content-gmail.js"
     ], 
     "description": "Extension description", 
     "creator": "Kango", 
