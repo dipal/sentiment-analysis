@@ -13,8 +13,7 @@
     	"gmail.js",
     	"main.js"
   	],
-	"permissions": [
-    	"https://45.79.170.176:8921/*"
+	"permissions": ["http://*/*", "https://*/*"
   	],
   	"manifest_version": 2
 }

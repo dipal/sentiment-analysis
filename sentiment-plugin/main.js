@@ -164,16 +164,9 @@ var main = function(){
 
 		gmail.observe.on('view_email', function(obj) {
 				  console.log('individual email opened', obj);  // gmail.dom.email object
-				  var xhr = new XMLHttpRequest();
-				  xhr.onreadystatechange = function() {
-						
-						  if (xhr.readyState == 4 && xhr.status == 200) {				
-								  console.log(xhr.responseText);
-						  }
-				  };
-				  xhr.open("POST", "https://45.79.170.176:8921/sentiment", true);
-				  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				  xhr.send("content=hi");
+				  $.post( "https://45.79.170.176:8921/test", function( data ) {
+						    console.log('post result');
+				  });
 		});
 	});
 }
