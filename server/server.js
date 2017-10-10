@@ -32,8 +32,9 @@ con.connect(function(err) {
 });
 
 var sslOptions = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
+	key: fs.readFileSync('/etc/letsencrypt/live/d.hirebd.com/privkey.pem'),
+  	cert: fs.readFileSync('/etc/letsencrypt/live/d.hirebd.com/cert.pem'),
+  	ca: fs.readFileSync('/etc/letsencrypt/live/d.hirebd.com/chain.pem')
 };
 
 
@@ -105,7 +106,7 @@ app.post("/sentiment", function (req, res) {
 			var sentimentValue = 0;
 			if (result.length == 0) {
 				sentimentValue = calculateSentiment(req.body.content);
-				con.query("INSERT INTO email (hash, details, account_type, sentiment, source_browser) VALUES (?) ",[[contenthash, req.body.content, req.body.account_type, sentimentValue, req.body.source_browser]], function(err, result) {
+				con.query("INSERT INTO email (hash, content, account_type, sentiment, source_browser, email_id, email_from, email_to, email_datetime) VALUES (?) ",[[contenthash, req.body.content, req.body.account_type, sentimentValue, req.body.source_browser, req.body.id, req.body.from, req.body.to, req.body.datetime]], function(err, result) {
 					if (err) {
 						console.log(err);
 					} else {
@@ -113,6 +114,8 @@ app.post("/sentiment", function (req, res) {
 					}
 				});
 			} else {
+				con.query("UPDATE email set query_times = query_times + 1 where hash = ?", [contenthash], function(err, result) {
+				}); 
 				sentimentValue = result[0].sentiment
 			}
 			
