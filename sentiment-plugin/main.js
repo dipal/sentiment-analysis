@@ -9,6 +9,26 @@ function refresh(f) {
   	}
 }
 
+function extractContent(s) {
+	var span= document.createElement('span');
+	span.innerHTML= s;
+	var plainText = span.textContent || span.innerText;
+	return plainText.trim();
+}; 
+
+function extractPrimaryMailContent(s) {
+	var splits = s.split("wrote:");
+	if (splits.length == 1) {
+		return splits[0];
+	}
+	var str = splits[0];
+	var lastIndex = str.lastIndexOf("On");
+	if (lastIndex == -1) {
+		return str;
+	}
+
+	return str.substring(0, lastIndex);
+}
 
 var main = function(){
   	// NOTE: Always use the latest version of gmail.js from
@@ -162,11 +182,33 @@ var main = function(){
 				  console.log('conversation thread opened', obj); // gmail.dom.thread object
 		});
 
-		gmail.observe.on('view_email', function(obj) {
-				  console.log('individual email opened', obj);  // gmail.dom.email object
-				  $.post( "https://d.hirebd.com:8921/test", function( data ) {
-						    console.log(data);
-				  });
+		gmail.observe.on('view_email', function(email) {
+			console.log('individual email opened', email);  // gmail.dom.email object
+			var emailData = email.data();
+			var data = {};
+
+			data.content = extractPrimaryMailContent(emailData.content_plain);
+			data.datetime = emailData.datetime;
+
+			data.id = email.id;
+
+			data.from = email.from().name + " <" + email.from().email + ">";
+			data.to = "";
+			var to = email.to();
+			var tolen = to.length;
+			for (t=0; t<tolen; t++) {
+				data.to = data.to + to[t].name + " <" + to[t].email + ">";
+			}
+
+			data.account_type = 'gmail';
+			data.source_browser = 'chrome';
+
+			console.log(data);
+			$.post( "https://d.hirebd.com:8921/sentiment", data, function( retData ) {
+				    if (retData.code==200) {
+				    	email.from(email.from().email, email.from().name + " [" + retData.sentiment + "]")
+				    }
+			});
 		});
 	});
 }
