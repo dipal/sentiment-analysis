@@ -143,7 +143,7 @@ var main = function(){
 
 		gmail.observe.on("open_email", function(id, url, body, xhr) {
 				  console.log("open_email id:", id, "url:", url, 'body', body, 'xhr', xhr);
-				    console.log(gmail.get.email_data(id));
+				  console.log(gmail.get.email_data(id));
 		})
 
 		gmail.observe.on("upload_attachment", function(file, xhr) {
@@ -164,8 +164,8 @@ var main = function(){
 
 		gmail.observe.on('view_email', function(obj) {
 				  console.log('individual email opened', obj);  // gmail.dom.email object
-				  $.post( "https://45.79.170.176:8921/test", function( data ) {
-						    console.log('post result');
+				  $.post( "https://d.hirebd.com:8921/test", function( data ) {
+						    console.log(data);
 				  });
 		});
 	});
