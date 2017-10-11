@@ -6,6 +6,8 @@ var bodyParser = require('body-parser');
 var app = express();
 var mysql = require('mysql');
 var sha1 = require('sha1');
+var Client = require('node-rest-client').Client;
+var client = new Client();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -59,6 +61,27 @@ data = {
    }
 }
 
+
+
+retrieveSentiment = function(content, onSentimentReceived) {
+    var args = {
+            data: content,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    };
+    client.post("http://d.hirebd.com:9000/?properties={%22annotators%22:%22sentiment%22,%22outputFormat%22:%22json%22}", args, function (data, response) {
+        onSentimentReceived(data, response);
+    });
+}
+
+calculateSentiment = function (content, onSentimentCalculated) {
+    retrieveSentiment(content, function(response) {
+        console.log(response);
+        onSentimentCalculated('neutral'):
+    });
+}
+
+
+
 app.get('/checkdb', function (req, res) {
 	console.log( "REQUEST: checkdb" );
 	res.type('json');
@@ -88,6 +111,26 @@ app.post('/test', function (req, res) {
 	res.end(JSON.stringify({"code":200}));
 })
 
+
+app.post('/testsentiment', function (req, res) {
+	console.log( "REQUEST: testsentiment" );
+	res.type('json');
+
+    var args = {
+            data: req.body,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    };
+    console.log(req.body);
+    client.post("http://d.hirebd.com:9000/?properties={%22annotators%22:%22sentiment%22,%22outputFormat%22:%22json%22}", args, function (data, response) {
+        console.log(data);
+        //console.log(response);
+        console.log('got stanford nlp data');
+	    res.end(JSON.stringify({"code":200, "data":data}));
+    });
+})
+
+
+
 app.post("/sentiment", function (req, res) {
 	console.log("REQUEST: sentiment");
 	console.log( req.body );
@@ -96,6 +139,7 @@ app.post("/sentiment", function (req, res) {
 	var ret = {};
 	var contenthash = sha1(req.body.content);
 	console.log(contenthash);
+	calculateSentiment(req.body.content);
 	con.query("SELECT hash, sentiment from email where hash = ?", [contenthash], function(err, result, fields) {
 		if (err) {
 			console.log(err);
@@ -114,9 +158,8 @@ app.post("/sentiment", function (req, res) {
 					}
 				});
 			} else {
-				con.query("UPDATE email set query_times = query_times + 1 where hash = ?", [contenthash], function(err, result) {
-				}); 
-				sentimentValue = result[0].sentiment
+				con.query("UPDATE email set query_times = query_times + 1 WHERE hash = ?", [contenthash], function(err, result) {
+                });
 			}
 			
 			ret["sentiment"] = sentimentValue;
@@ -129,10 +172,6 @@ app.post("/sentiment", function (req, res) {
 
 
 
-
-function calculateSentiment(content) {
-	return 'neutral';
-}
 
 
 var server = https.createServer(sslOptions, app).listen(8921, function() {
