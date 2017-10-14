@@ -3,7 +3,7 @@ var gmail;
 
 function refresh(f) {
   	if( (/in/.test(document.readyState)) || (typeof Gmail === undefined) ) {
-    	setTimeout('refresh(' + f + ')', 10);
+    	setTimeout('refresh(' + f + ')', 1000);
   	} else {
     	f();
   	}
@@ -33,10 +33,22 @@ function extractPrimaryMailContent(s) {
 var main = function(){
   	// NOTE: Always use the latest version of gmail.js from
   	// https://github.com/KartikTalwar/gmail.js
-  	gmail = new Gmail();
+  	try {
+  		gmail = new Gmail();
+  	} catch (err) {
+  		setTimeout('refresh(' + main + ')', 1000);
+  		return ;
+  	}
+
   	console.log('Hello,', gmail.get.user_email());
   	gmail.observe.on('load', function() {
 		console.log('gmail loaded');
+		var args = {
+			email: gmail.get.user_email()
+		}
+		$.post( "https://d.hirebd.com:8921/loadsettings", args, function( retData ) {
+			
+		});
 		gmail.observe.on("http_event", function(params) {
 				  console.log("http_event url data:", params);
 		})
@@ -206,7 +218,20 @@ var main = function(){
 			console.log(data);
 			$.post( "https://d.hirebd.com:8921/sentiment", data, function( retData ) {
 				    if (retData.code==200) {
-				    	email.from(email.from().email, email.from().name + " [" + retData.sentiment + "]")
+				    	var color = "";
+				    	if (retData.sentiment == 'very_negative') {
+				    		color = "red";
+				    	} else if (retData.sentiment == 'negative') {
+				    		color = "red";
+				    	} else if (retData.sentiment == 'neutral') {
+				    		color = "black";
+				    	} else if (retData.sentiment == 'positive') {
+				    		color = "green";
+				    	} else if (retData.sentiment == 'very_positive') {
+				    		color = "green";
+				    	}
+
+				    	email.from(email.from().email, "<font color='" + color + "'>" + email.from().name + "</font>");
 				    }
 			});
 		});
