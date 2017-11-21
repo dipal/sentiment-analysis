@@ -23,6 +23,7 @@ var Outlook_ = function(localJQuery) {
     var api = {
         get : {},
         observe : {},
+        dom : {}
     };
 
     api.version           = "0.6.4";
@@ -32,69 +33,14 @@ var Outlook_ = function(localJQuery) {
         return api.tracker.globals[10];
     };
 
-    api.dom.inbox_content = function() {
-        return $("div[role=main]:first");
+    api.dom.primary_container = function() {
+        return document.getElementById('primaryContainer');
     };
 
 
-    /**
-       Observe DOM nodes being inserted. When a node with a class defined in api.tracker.dom_observers is inserted,
-       trigger the related event and fire off any relevant bound callbacks
-       This function should return true if a dom observer is found for the specified action
-    */
     api.observe.on_dom = function(action, callback) {
 
-        // check observers configured
-        if(!api.tracker.dom_observer_init) {
-            api.observe.initialize_dom_observers();
-        }
-
-        // support for DOM observers
-        if($.inArray(action, api.tracker.supported_observers) > -1) {
-
-            //console.log("observer found",api.tracker.dom_observers[action]);
-
-            // if we haven"t yet bound the DOM insertion observer, do it now
-            if(!api.tracker.observing_dom) {
-                api.tracker.observing_dom = true;
-                //api.tracker.dom_watchdog = {}; // store passed observer callbacks for different DOM events
-
-                // this listener will check every element inserted into the DOM
-                // for specified classes (as defined in api.tracker.dom_observers above) which indicate
-                // related actions which need triggering
-                $(window.document).bind("DOMNodeInserted", function(e) {
-                    api.tools.insertion_observer(e.target, api.tracker.dom_observers, api.tracker.dom_observer_map);
-                });
-
-                // recipient_change also needs to listen to removals
-                var mutationObserver = new MutationObserver(function(mutations) {
-                    for (var i = 0; i < mutations.length; i++) {
-                        var mutation = mutations[i];
-                        var removedNodes = mutation.removedNodes;
-                        for (var j = 0; j < removedNodes.length; j++) {
-                            var removedNode = removedNodes[j];
-                            if (removedNode.className === "vR") {
-                                var observer = api.tracker.dom_observer_map["vR"];
-                                var handler = api.tracker.dom_observers.recipient_change.handler;
-                                api.observe.trigger_dom(observer, $(mutation.target), handler);
-                            }
-                        }
-                    }
-                });
-                mutationObserver.observe(document.body, {subtree: true, childList: true});
-
-            }
-            api.observe.bind("dom",action,callback);
-            // console.log(api.tracker.observing_dom,"dom_watchdog is now:",api.tracker.dom_watchdog);
-            return true;
-
-            // support for gmail interface load event
-        }
-        else if(action === "compose_cancelled") {
-            console.log("set compose cancelled callback");
-            api.tracker.composeCancelledCallback = callback;
-        }
-        else if(action === "load") {
+        if(action === "load") {
 
             // wait until the gmail interface has finished loading and then
             // execute the passed handler. If interface is already loaded,
@@ -174,6 +120,9 @@ var Outlook_ = function(localJQuery) {
             }
         });
     };
+
+    return api;
+};
 
 function initializeOnce(fn) {
     var result;
