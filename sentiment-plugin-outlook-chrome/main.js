@@ -2,7 +2,8 @@ var outlook;
 
 
 function refresh(f) {
-  	if( (/in/.test(document.readyState)) || (typeof Gmail === undefined) ) {
+	console.log('refresh');
+  	if( (/in/.test(document.readyState)) || (typeof Outlook === undefined) ) {
     	setTimeout('refresh(' + f + ')', 1000);
   	} else {
     	f();
@@ -12,10 +13,12 @@ function refresh(f) {
 var main = function(){
   	// NOTE: Always use the latest version of gmail.js from
   	// https://github.com/KartikTalwar/gmail.js
+  	console.log('main');
   	try {
-  		outlook = new Gmail();
+  		outlook = new Outlook();
   	} catch (err) {
   		setTimeout('refresh(' + main + ')', 1000);
+  		console.log(err);
   		return ;
   	}
 
