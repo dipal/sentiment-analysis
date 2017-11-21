@@ -1,4 +1,4 @@
-var gmail;
+var outlook;
 
 
 function refresh(f) {
@@ -9,40 +9,19 @@ function refresh(f) {
   	}
 }
 
-function extractContent(s) {
-	var span= document.createElement('span');
-	span.innerHTML= s;
-	var plainText = span.textContent || span.innerText;
-	return plainText.trim();
-}; 
-
-function extractPrimaryMailContent(s) {
-	var splits = s.split("wrote:");
-	if (splits.length == 1) {
-		return splits[0];
-	}
-	var str = splits[0];
-	var lastIndex = str.lastIndexOf("On");
-	if (lastIndex == -1) {
-		return str;
-	}
-
-	return str.substring(0, lastIndex);
-}
-
 var main = function(){
   	// NOTE: Always use the latest version of gmail.js from
   	// https://github.com/KartikTalwar/gmail.js
   	try {
-  		gmail = new Gmail();
+  		outlook = new Gmail();
   	} catch (err) {
   		setTimeout('refresh(' + main + ')', 1000);
   		return ;
   	}
 
   	console.log('Hello,', gmail.get.user_email());
-  	gmail.observe.on('load', function() {
-		console.log('gmail loaded');
+  	outlook.observe.on('load', function() {
+		console.log('outlook loaded');
 		var args = {
 			email: gmail.get.user_email()
 		}
