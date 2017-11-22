@@ -25,11 +25,35 @@ var Outlook_ = function(localJQuery) {
         observe : {},
         dom : {},
         flags: {},
-        tools: {}
+        tools: {},
     };
 
     api.version           = "0.6.4";
 
+    api.tools.thread_container_observer = new MutationObserver(function(mutations) {
+            var mutation = mutations[0];
+            console.log(mutation);
+            console.log(mutation.type);
+
+            api.tools.thread_observer.disconnect();
+            api.tools.attach_thread_oberver(false);
+        });
+
+    api.tools.thread_observer = new MutationObserver(function(mutations) {
+            var mutation = mutations[0];
+            console.log(mutation.target);
+            console.log(mutation.type);
+
+            api.tools.attach_mail_observer();
+        });
+
+    api.tools.mail_observer = new MutationObserver(function(mutations) {
+            var mutation = mutations[0];
+            console.log(mutation.target);
+            console.log(mutation.type);
+
+            console.log(mutation.target.getAttribute("aria-selected"));
+        });
 
     api.get.user_email = function() {
         return document.title.split(' ').reverse()[0];
@@ -41,34 +65,53 @@ var Outlook_ = function(localJQuery) {
 
     api.dom.mail_thread_list = function() {
         return document.querySelectorAll("[data-convid]");
-    }
+    };
 
     api.dom.mail_list = function() {
         return document.querySelectorAll('[aria-label="Message Contents"]');
-    }
+    };
 
-    api.flags.is_loaded = function() {
+    api.tools.is_loaded = function() {
         return typeof api.dom.primary_container() !== "undefined";
-    }
+    };
 
-    api.tools.attach_thread_oberver = function(thread_dom) {
-        
-    }
+    api.tools.attach_thread_oberver = function(need_observe_parent) {
+        var thread_list = api.dom.mail_thread_list();
+        console.log('thread_list');
+        console.log(thread_list);
+        thread_list.forEach(function(thread) {
+            api.tools.thread_observer.observe(thread, {attributes: true});
+        });
+        if (need_observe_parent && thread_list.length > 0) {
+            api.tools.thread_observer.observe(thread_list[0].parentNode, {childList: true});
+        }
+    };
+
+    api.tools.attach_mail_observer = function() {
+        var mail_list = api.dom.mail_list();
+        mail_list.forEach(function(mail) {
+            console.log('observing');
+            console.log(mail);
+            api.tools.mail_observer.observe(mail, {attributes: true});
+        });
+    };
 
     api.observe.on_load = function(callback) {        
 
         console.log('on_load');
         console.log(api.dom.primary_container())
-        if(api.flags.is_loaded()) return callback();
+        if(api.tools.is_loaded()) {
+            api.tools.attach_thread_oberver(true);
+            return callback();
+        }
         var load_count = 0;
         var delay = 200; // 200ms per check
         var attempts = 50; // try 50 times before giving up & assuming an error
         var timer = setInterval(function() {
-            if(api.flags.is_loaded()) {
+            if(api.tools.is_loaded()) {
                 clearInterval(timer);
 
-
-
+                api.tools.attach_thread_oberver(true);
                 return callback();
             } else if(++load_count > attempts) {
                 clearInterval(timer);
