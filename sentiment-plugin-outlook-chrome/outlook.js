@@ -41,10 +41,14 @@ var Outlook_ = function(localJQuery) {
 
     api.tools.thread_observer = new MutationObserver(function(mutations) {
             var mutation = mutations[0];
+            console.log('thread selection changed')
             console.log(mutation.target);
             console.log(mutation.type);
 
-            api.tools.attach_mail_observer();
+            //have some time to generate the dom
+            window.setTimeout(function(){
+                api.tools.attach_mail_observer();
+            }, 2000);            
         });
 
     api.tools.mail_observer = new MutationObserver(function(mutations) {
@@ -75,12 +79,16 @@ var Outlook_ = function(localJQuery) {
         return typeof api.dom.primary_container() !== "undefined";
     };
 
+    api.tools.process_sentiment = function(mail) {
+        console.log('processing mail ', mail);
+    }
+
     api.tools.attach_thread_oberver = function(need_observe_parent) {
         var thread_list = api.dom.mail_thread_list();
         console.log('thread_list');
         console.log(thread_list);
         thread_list.forEach(function(thread) {
-            api.tools.thread_observer.observe(thread, {attributes: true});
+            api.tools.thread_observer.observe(thread, {attributes: true, attributeOldValue: true});
         });
         if (need_observe_parent && thread_list.length > 0) {
             api.tools.thread_observer.observe(thread_list[0].parentNode, {childList: true});
@@ -89,10 +97,11 @@ var Outlook_ = function(localJQuery) {
 
     api.tools.attach_mail_observer = function() {
         var mail_list = api.dom.mail_list();
+        console.log('attach_mail_observer ' + mail_list.length + ' mails');
         mail_list.forEach(function(mail) {
-            console.log('observing');
-            console.log(mail);
-            api.tools.mail_observer.observe(mail, {attributes: true});
+            console.log('observing ', mail, mail.getAttribute('aria-selected'));
+            //console.log(mail);
+            api.tools.mail_observer.observe(mail, {attributes: true, attributeOldValue: true});
         });
     };
 
