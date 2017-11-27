@@ -48,6 +48,7 @@ var Outlook_ = function(localJQuery) {
             //have some time to generate the dom
             window.setTimeout(function(){
                 api.tools.attach_mail_observer();
+                api.tools.process_sentiment();
             }, 2000);            
         });
 
@@ -79,8 +80,14 @@ var Outlook_ = function(localJQuery) {
         return typeof api.dom.primary_container() !== "undefined";
     };
 
-    api.tools.process_sentiment = function(mail) {
-        console.log('processing mail ', mail);
+    api.tools.process_sentiment = function() {
+        var mail_list = api.dom.mail_list();
+        mail_list.forEach(function(mail){
+            if (mail.getAttribute('aria-selected') == true) {
+                console.log('processing mail ', mail);
+            }
+        });
+        
     }
 
     api.tools.attach_thread_oberver = function(need_observe_parent) {
@@ -103,6 +110,7 @@ var Outlook_ = function(localJQuery) {
             //console.log(mail);
             api.tools.mail_observer.observe(mail, {attributes: true, attributeOldValue: true});
         });
+        api.tools.process_sentiment();
     };
 
     api.observe.on_load = function(callback) {        
