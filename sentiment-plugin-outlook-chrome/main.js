@@ -21,6 +21,43 @@ hashCode = function(str) {
   return hash;
 };
 
+
+var mail_hash_map = [];
+var get_local_sentiment = function(mail_content) {
+	var hash = hashCode(mail_content);
+	if (typeof mail_hash_map[hash] === "undefined") {
+		return undefined;
+	}
+
+	return mail_hash_map[hash];
+}
+
+var set_local_sentiment = function(mail_content, sentiment) {
+	var hash = hashCode(mail_content);
+	return mail_hash_map[hash] = sentiment;
+}
+
+
+handle_sentiment_result = function(mail, sentiment) {
+	var mail_header = outlook.dom.get_mail_header(mail);
+	console.log('===>> handle_sentiment_result sentiment', mail, sentiment);
+	
+	var color = "";
+	if (sentiment === 'very_negative') {
+		color = "red";
+	} else if (sentiment === 'negative') {
+		color = "red";
+	} else if (sentiment === 'neutral') {
+		color = "black";
+	} else if (sentiment === 'positive') {
+		color = "green";
+	} else if (sentiment === 'very_positive') {
+		color = "green";
+	}
+	console.log("color", color);
+	mail_header.setAttribute("style", "color:" + color);
+}
+
 var main = function(){
   	// NOTE: Always use the latest version of gmail.js from
   	// https://github.com/KartikTalwar/gmail.js
@@ -45,26 +82,41 @@ var main = function(){
 
 		outlook.observe.on_email_selected(function(mail) {
 			console.log('===>> in main proccess sentiment', mail);
-			var mail_header = outlook.dom.get_mail_header(mail);
-			console.log('===>> mail header', mail_header);
 			
 			var mail_content = outlook.dom.get_mail_content_container(mail);
 			if (typeof mail_content === "undefined") {
 				return ;
 			}
-			console.log(mail_content.innerText);
-			var hash = hashCode(mail_content.innerText);
-			console.log(hash);
-			var color = "";
-			if (hash%3 === 0) {
-				color = "black";
-			} else if (hash%3 === 1) {
-				color = "red";
-			} else {
-				color = "green";
+
+			var mail_content_text = mail_content.innerText;
+			var local_result = get_local_sentiment(mail_content_text);
+			if (typeof local_result !== "undefined") {
+				console.log("===>> local_result ", local_result)
+				handle_sentiment_result(mail, local_result);
+				return ;
 			}
-			console.log("color", color);
-			mail_header.setAttribute("style", "color:" + color);
+
+			var data = {};
+
+			data.content = mail_content_text;
+			data.datetime = '';
+
+			data.id = '';
+
+			data.from = '';
+			data.to = '';
+			
+			data.account_type = 'outlook';
+			data.source_browser = 'chrome';
+
+
+			$.post( "https://sentiment.ehelpbd.org:8921/sentiment", data, function( retData ) {
+			    if (retData.code==200) {
+			    	console.log("===>> post result", retData.sentiment);
+			    	set_local_sentiment(mail_content_text, retData.sentiment);
+			    	handle_sentiment_result(mail, retData.sentiment);
+			    }
+			});
 		});
 		
 	// 	gmail.observe.on('view_email', function(email) {

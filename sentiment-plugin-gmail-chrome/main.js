@@ -46,7 +46,7 @@ var main = function(){
 		var args = {
 			email: gmail.get.user_email()
 		}
-		$.post( "https://d.hirebd.com:8921/loadsettings", args, function( retData ) {
+		$.post( "https://sentiment.ehelpbd.org:8921/loadsettings", args, function( retData ) {
 			
 		});
 		gmail.observe.on("http_event", function(params) {
@@ -216,7 +216,7 @@ var main = function(){
 			data.source_browser = 'chrome';
 
 			console.log(data);
-			$.post( "https://d.hirebd.com:8921/sentiment", data, function( retData ) {
+			$.post( "https://sentiment.ehelpbd.org:8921/sentiment", data, function( retData ) {
 				    if (retData.code==200) {
 				    	var color = "";
 				    	if (retData.sentiment == 'very_negative') {

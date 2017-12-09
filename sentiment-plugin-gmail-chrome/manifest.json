@@ -1,5 +1,5 @@
 {
-  	"name": "Sentiment",
+  	"name": "Sentiment Gmail",
   	"version": "0.1",
   	"description": "Sentiment analyser for gmail",
   	"content_scripts": [
