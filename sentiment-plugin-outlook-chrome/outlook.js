@@ -31,6 +31,7 @@ var Outlook_ = function(localJQuery) {
     api.version           = "0.6.4";
 
     api.tools.thread_container_observer = new MutationObserver(function(mutations) {
+            console.log('===>> thread_container_observer');
             var mutation = mutations[0];
             console.log(mutation);
             console.log(mutation.type);
@@ -40,6 +41,7 @@ var Outlook_ = function(localJQuery) {
         });
 
     api.tools.thread_observer = new MutationObserver(function(mutations) {
+            console.log('===>> thread_observer');
             var mutation = mutations[0];
             console.log('thread selection changed')
             console.log(mutation.target);
@@ -53,11 +55,16 @@ var Outlook_ = function(localJQuery) {
         });
 
     api.tools.mail_observer = new MutationObserver(function(mutations) {
+            console.log('===>> mail_observer');
             var mutation = mutations[0];
             console.log(mutation.target);
             console.log(mutation.type);
 
             console.log(mutation.target.getAttribute("aria-selected"));
+            window.setTimeout(function(){
+                //api.tools.attach_mail_observer();
+                api.tools.process_sentiment();
+            }, 2000); 
         });
 
     api.get.user_email = function() {
@@ -80,11 +87,20 @@ var Outlook_ = function(localJQuery) {
         return typeof api.dom.primary_container() !== "undefined";
     };
 
+    api.dom.get_mail_header = function(mail) {
+        return mail.getElementsByClassName('bidi')[0];
+    }
+
+    api.dom.get_mail_content_container = function(mail) {
+        return mail.querySelectorAll('[dir="ltr"]')[0];
+    }
+
     api.tools.process_sentiment = function() {
         var mail_list = api.dom.mail_list();
         mail_list.forEach(function(mail){
-            if (mail.getAttribute('aria-selected') == true) {
-                console.log('processing mail ', mail);
+            if (mail.getAttribute('aria-selected') === "true") {
+                console.log('===>> [in lib] processing mail ', mail);
+                api.tools.process_email_callback(mail);
             }
         });
         
@@ -140,7 +156,10 @@ var Outlook_ = function(localJQuery) {
     
     };
 
-    api.observe.on_thread
+    api.observe.on_email_selected = function(callback) {
+        api.tools.process_email_callback = callback;
+    }
+    //api.observe.on_thread
 
     return api;
 };

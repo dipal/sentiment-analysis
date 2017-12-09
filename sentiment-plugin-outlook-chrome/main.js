@@ -10,6 +10,17 @@ function refresh(f) {
   	}
 }
 
+hashCode = function(str) {
+  var hash = 0, i, chr;
+  if (str.length === 0) return hash;
+  for (i = 0; i < str.length; i++) {
+    chr   = str.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
 var main = function(){
   	// NOTE: Always use the latest version of gmail.js from
   	// https://github.com/KartikTalwar/gmail.js
@@ -22,14 +33,38 @@ var main = function(){
   		return ;
   	}
 
-  	console.log('Hello,', outlook.get.user_email());
+  	console.log('===>> Hello,', outlook.get.user_email());
   	outlook.observe.on_load(function() {
-		console.log('outlook loaded');
+		console.log('===>> outlook loaded');
 		var args = {
 			email: outlook.get.user_email()
 		}
-		$.post( "https://d.hirebd.com:8921/loadsettings", args, function( retData ) {
+		$.post( "https://sentiment.ehelpbd.org:8921/loadsettings", args, function( retData ) {
 			
+		});
+
+		outlook.observe.on_email_selected(function(mail) {
+			console.log('===>> in main proccess sentiment', mail);
+			var mail_header = outlook.dom.get_mail_header(mail);
+			console.log('===>> mail header', mail_header);
+			
+			var mail_content = outlook.dom.get_mail_content_container(mail);
+			if (typeof mail_content === "undefined") {
+				return ;
+			}
+			console.log(mail_content.innerText);
+			var hash = hashCode(mail_content.innerText);
+			console.log(hash);
+			var color = "";
+			if (hash%3 === 0) {
+				color = "black";
+			} else if (hash%3 === 1) {
+				color = "red";
+			} else {
+				color = "green";
+			}
+			console.log("color", color);
+			mail_header.setAttribute("style", "color:" + color);
 		});
 		
 	// 	gmail.observe.on('view_email', function(email) {
